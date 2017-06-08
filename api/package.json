@@ -1,0 +1,35 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "analyze trend according to different criterion",
+  "main": "server.js",
+  "scripts": {
+    "test": "trendanalysis",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://complex007@github.com/complex007/trendanalysis.git"
+  },
+  "keywords": [
+    "nodejs"
+  ],
+  "author": "wangyuqi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/complex007/trendanalysis/issues"
+  },
+  "homepage": "https://github.com/complex007/trendanalysis#readme",
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "express-myconnection": "^1.0.4",
+    "http": "0.0.0",
+    "mysql": "^2.13.0",
+    "node-mysql": "^0.4.2",
+    "path": "^0.12.7"
+  }
+}
