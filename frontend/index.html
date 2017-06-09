@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!-- Application Name - app.js and Main controller - controller.js-->
+<html ng-app="TrendAnalysisApp">
+
+<head>
+    
+    <title>Trend Analysis</title>
+
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="public/libs/bootstrap/dist/css/bootstrap.min.css">
+
+    <!-- Fonts  -->
+    <link rel="stylesheet" href="public/libs/font-awesome/css/font-awesome.min.css">
+
+<meta charset="utf-8">  <!-- it's important for d3.js -->
+
+<link rel="stylesheet" href="public/libs/nvd3/build/nv.d3.css">
+
+
+</head>
+
+
+<body>
+   <h1>index</h1>
+    <div>
+        <header id="header" ui-view="header"></header>      
+        <div  id="content" ui-view="content"></div>           
+        <div id="footer" ui-view="footer"> </div>       
+    </div>
+
+    <!-- jQuery -->
+    <script src="public/libs/jquery/dist/jquery.min.js"></script>
+
+
+    <!-- Angular -->
+    <script src="public/libs/angular/angular.js"></script>
+
+ <!-- bootstrap -->
+    <script src="public/libs/bootstrap/dist/js/bootstrap.js"></script>
+
+    <!-- ui-router -->
+    <script src="public/libs/angular-ui-router/release/angular-ui-router.min.js"></script>
+
+  <!-- ngresurce -->
+    
+
+<script src="public/libs/angular-resource/angular-resource.js"></script>
+
+
+<!--nvd3-->
+
+<script src="public/libs/d3/d3.js"></script>
+<script src="public/libs/nvd3/build/nv.d3.js"></script> <!-- or use another assembly -->
+<script src="public/libs/angular-nvd3/dist/angular-nvd3.js"></script>
+
+    <!-- User Script -->
+    <script src="public/js/app.js"></script>
+      <script src="public/js/config.js"></script>
+    <script src="modules/trendanalysis/TrendAnalysisCtrl.js"></script>
+     <script src="modules/trendanalysis/TrendAnalysisService.js"></script>
+  
+</body>
+</html>

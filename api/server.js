@@ -5,12 +5,11 @@ var app = express();
 var path = require('path');
 var http = require('http');
 var bodyParser = require('body-parser');
- 
-var methods = require('./controllers/trendAnalysisCtrl.js'); 
 var mysql  = require('mysql');
 var connection  = require('express-myconnection'); 
+var routes=require('./routes/trendAnalysisRoutes');
+var cors=require('./routes/cors');
 
- 
 app.set('port', process.env.PORT || 1338);
 
  
@@ -20,7 +19,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json 
 app.use(bodyParser.json());
  
-
 app.use(connection(mysql, {
   host : 'localhost',
   user : 'yuqi',
@@ -29,22 +27,11 @@ app.use(connection(mysql, {
   port:'3306'
 }, 'pool'));
  
-//Creating Router() object
-var router = express.Router(); 
- 
+ app.use(cors);
 
- 
-router.get("/", function(req, res){
-  // send back json data
-  console.log("/" + req.method);
-  res.json({"message" : "Hello World"});
-});
 
- 
-router.get('/api/data', methods.getTrend);
- 
-app.use("/", router);
-    
+ routes(app);
+
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
