@@ -1,31 +1,51 @@
+'use strict';
 
 
+var trendAnalysisService = require('../service/trendAnalysisService');
 
 function getTrend(req, res){
-var pg = req.url;
-
-//var paramlist=req.query.id;
-
-  req.getConnection(function(err,connection){
-       
-      var query = connection.query('SELECT * FROM monthlyrevenue',function(err,rows)
-      {
-        if(err)
+        var pg = req.url;
+        var period = req.query.period;
+        var filter = req.query.filter;
+        var page = req.query.page;
+        var pagelimit = req.query.pagelimit;
+        if(period === "All")
         {
-          console.log("Error Selecting : %s ",err );
+            trendAnalysisService.getMonthlyTrend()
+                .then(function(data){
+                    res.json(data);
+                }).catch(function (err) {
+                    res.json(400, err);
+                })
+            ;
         }
-         else
-         {
-            
-           res.json(rows); 
-         } 
-         });
-      });
-  
+        else if(period === "Today")
+        {
+            trendAnalysisService. getTodayTrend()
+                .then(function(data){
+                    res.json(data);
+                }).catch(function (err) {
+                    res.json(400, err);
+                })
+            ;
+        }
+        else
+        {
+
+            trendAnalysisService.getTrend(filter,page,pagelimit)
+                .then(function(data){
+                    res.json(data);
+                }).catch(function (err) {
+                    res.json(400, err);
+                })
+            ;
+
+
+        }
+
+
 }
- 
- 
-//need a compare class
+
  
 module.exports={
     getTrend:getTrend

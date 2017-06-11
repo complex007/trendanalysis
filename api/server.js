@@ -7,10 +7,11 @@ var http = require('http');
 var bodyParser = require('body-parser');
 var mysql  = require('mysql');
 var connection  = require('express-myconnection'); 
-var routes=require('./routes/trendAnalysisRoutes');
-var cors=require('./routes/cors');
+var routes = require('./routes/trendAnalysisRoutes');
+var cors = require('./routes/cors');
+var sequelize = require('./config/dbconnection');
 
-app.set('port', process.env.PORT || 1338);
+    app.set('port', process.env.PORT || 1338);
 
  
 // parse application/x-www-form-urlencoded 
@@ -19,14 +20,33 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json 
 app.use(bodyParser.json());
  
-app.use(connection(mysql, {
-  host : 'localhost',
-  user : 'yuqi',
-  password : '123456wyq',
-  database : 'trendanalysis',
-  port:'3306'
-}, 'pool'));
+
+
+
+sequelize
+  .authenticate()
+  .then(function(){
+    console.log('Connection has been established successfully.');
+  })
+  .catch(function(err){
+    console.error('Unable to connect to the database:', err);
+  });
+  
+
+
+
+// app.use(connection(mysql, {
+//   host : 'localhost',
+//   user : 'root',
+//   password : 'root',
+//   database : 'trendanalysis',
+//   port:'8889'
+// }, 'pool'));
  
+
+
+
+
  app.use(cors);
 
 
