@@ -98,7 +98,7 @@ function getAllData(filter,page,pageLimit){
     else
     {
         // handle datetime LIKE in mysql
-        sequelize.query('SELECT * ,(select count(a.id) from invoice a  '
+        sequelize.query('SELECT * ,(select count(a.id) from Invoice a  '
             +'WHERE a.Customer LIKE :search_name or a.IssueDate like :search_day or a.IssueDate like :search_date ) as countnum  '
             +'FROM Invoice WHERE Customer LIKE :search_name or IssueDate like :search_day or IssueDate like :search_date '
             +'  ORDER BY `Invoice`.`IssueDate` ASC   LIMIT :pageno,:pagelimitno',
