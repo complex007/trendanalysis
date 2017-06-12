@@ -16,52 +16,10 @@ function getNvd3MonthlyTrend(){
         }
     )
         .then(function(records) {
+           
+            var serverLocal = serverLocalTime(records,'month');
 
-            var today = new Date();
-            //find timezone of server
-            var timezone=today.getTimezoneOffset()/60;
-            for(var i = 0; i < records.length; i++)
-            {
-                var issuetime = new Date(records[i].IssueDate);
-
-                //UTCtime change to server local time
-                issuetime.setHours(
-                    issuetime.getHours()+timezone,
-                    issuetime.getMinutes(),
-                    issuetime.getSeconds(),
-                    issuetime.getMilliseconds()
-                );
-
-                if(i === 0)
-                {
-                    values.push([issuetime,records[i].Amount]);
-                    sumValues.push([issuetime,records[i].Amount]);
-                }
-                else
-                {
-
-                     var predatetime=new Date(values[values.length-1][0]);
-
-                    //if the previous record in  values and sumvalues and the current date are in the same month ,
-                    //the amount will be added to the previous record
-                    // or add a new record in values and sumvalues
-                    if(predatetime.getYear()==issuetime.getYear()&&predatetime.getMonth()==issuetime.getMonth())
-                    {
-                        values[values.length-1][1] += records[i].Amount;
-                        sumValues[sumValues.length-1][1] = sumValues[sumValues.length-1][1]+ records[i].Amount;
-                    }
-                    else
-                    {
-                         values.push([issuetime,records[i].Amount]);
-                         sumValues.push([issuetime,records[i].Amount+sumValues[sumValues.length-1][1]]);
-
-                    }
-
-                }
-
-            }
-
-            defer.resolve([{'values':values},{'sumvalues':sumValues}]) ;
+            defer.resolve([{'values':serverLocal.values},{'sumvalues':serverLocal.sumValues}]) ;
         })
         .catch(function (err) {
             defer.reject(err);
@@ -76,56 +34,35 @@ function getNvd3MonthlyTrend(){
 
 function getNvd3TodayTrend(){
     var defer = q.defer();
-    var values = [];
-    var sumValues=[];
+   
     var today=new Date();
     var todayStart=new Date();
 
     todayStart.setHours(0,0,0,0);
-
-    trendAnalysisModel.dailyRevenueModel.findAll({
-        where: {
-            id: {
-                $gte: todayStart,
-                $lte:today
-            }
-        } ,
-        order: [
-            ['id', 'ASC'],
-        ]
-
-
-    })
+    trendAnalysisModel.invoiceModel.findAll(
+        { 
+            where: {
+            IssueDate: {
+                    $gte: todayStart,
+                    $lte:today
+                }
+             }
+            ,
+            order: [
+                ['IssueDate', 'ASC'],
+             ]
+        }
+    )
         .then(function(records) {
+          
+            var serverLocal=serverLocalTime(records);
 
-            for(var i = 0; i < records.length; i++)
-            {
-                var UTCtime = new Date(records[i].id);
-                values.push([UTCtime,records[i].dailyamount]);
-
-                if(i === 0)
-                {
-
-                    sumValues.push([UTCtime,records[i].dailyamount]);
-                }
-                else
-                {
-
-                    sumValues.push([UTCtime,records[i].dailyamount+sumValues[i-1][1]]);
-                }
-
-            }
-
-            defer.resolve([{'values':values},{'sumvalues':sumValues}]) ;
+            defer.resolve([{'values':serverLocal.values},{'sumvalues':serverLocal.sumValues}]) ;
         })
         .catch(function (err) {
             defer.reject(err);
         })
-
-
     return defer.promise;
-
-
 }
 
 
@@ -189,6 +126,80 @@ function getAllData(filter,page,pageLimit){
     return defer.promise;
 
 
+}
+
+
+function serverLocalTime(records,type){
+
+            var today = new Date();
+            var values = [];
+            var sumValues=[];
+            //find timezone of server
+            var timezone=today.getTimezoneOffset()/60;
+            for(var i = 0; i < records.length; i++)
+            {
+                var issuetime = new Date(records[i].IssueDate);
+
+                //UTCtime change to server local time
+                issuetime.setHours(
+                    issuetime.getHours()+timezone,
+                    issuetime.getMinutes(),
+                    issuetime.getSeconds(),
+                    issuetime.getMilliseconds()
+                );
+
+                if(i === 0)
+                {
+                    values.push([issuetime,records[i].Amount]);
+                    sumValues.push([issuetime,records[i].Amount]);
+                }
+                else
+                {
+
+                     var predatetime=new Date(values[values.length-1][0]);
+
+                     if(type === 'month')
+                     {
+                        //if the previous record in  values and sumvalues and the current date are in the same month ,
+                        //the amount will be added to the previous record
+                        // or add a new record in values and sumvalues
+                        if(predatetime.getYear()==issuetime.getYear()&&predatetime.getMonth()==issuetime.getMonth())
+                        {
+                            values[values.length-1][1] += records[i].Amount;
+                            sumValues[sumValues.length-1][1] = sumValues[sumValues.length-1][1]+ records[i].Amount;
+                        }
+                        else
+                        {
+                            values.push([issuetime,records[i].Amount]);
+                            sumValues.push([issuetime,records[i].Amount+sumValues[sumValues.length-1][1]]);
+                        }
+                     }
+                     else
+                     {
+                        //if the previous record in  values and sumvalues and the current date are the same,
+                        //the amount will be added to the previous record
+                        // or add a new record in values and sumvalues                        
+                        if(predatetime.toString() === issuetime.toString())
+                        {
+                            values[values.length-1][1] += records[i].Amount;
+                            sumValues[sumValues.length-1][1] = sumValues[sumValues.length-1][1]+ records[i].Amount;
+                        }
+                        else
+                        {
+                            values.push([issuetime,records[i].Amount]);
+                            sumValues.push([issuetime,records[i].Amount+sumValues[sumValues.length-1][1]]);
+                        }
+                     }
+                   
+                }
+            }
+
+            var localTime={
+                'values':values,
+                'sumValues':sumValues
+            };
+          
+        return localTime;
 }
 
 

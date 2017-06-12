@@ -9,6 +9,7 @@ function getTrend(req, res){
         var filter = req.query.filter;
         var page = req.query.page;
         var pagelimit = req.query.pagelimit;
+       
         if(period === "All")
         {
             trendAnalysisService.getMonthlyTrend()

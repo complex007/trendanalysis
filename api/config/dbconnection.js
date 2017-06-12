@@ -3,7 +3,7 @@ var Sequelize=require('sequelize');
 var sequelize = new Sequelize('trendanalysis', 'yuqi', '123456wyq', {
   host: 'localhost',
   dialect: 'mysql',
-  port:'8889',
+  port:'3306',
   pool: {
     max: 5,
     min: 0,
