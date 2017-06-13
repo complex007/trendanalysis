@@ -10,8 +10,10 @@ function getTrend(req, res){
         var page = req.query.page;
         var pagelimit = req.query.pagelimit;
        
-        if(period === "All")
+       // when get data for chart , no page is set in the query of request.
+        if(period === "All" && page === undefined)
         {
+            
             trendAnalysisService.getMonthlyTrend()
                 .then(function(data){
                     res.json(data);
@@ -20,8 +22,9 @@ function getTrend(req, res){
                 })
             ;
         }
-        else if(period === "Today")
+        else if(period === "Today" && page === undefined )
         {
+             
             trendAnalysisService. getTodayTrend()
                 .then(function(data){
                     res.json(data);
@@ -32,8 +35,8 @@ function getTrend(req, res){
         }
         else
         {
-
-            trendAnalysisService.getTrend(filter,page,pagelimit)
+            
+            trendAnalysisService.getTrend(period,filter,page,pagelimit)
                 .then(function(data){
                     res.json(data);
                 }).catch(function (err) {

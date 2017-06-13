@@ -66,42 +66,90 @@ function getNvd3TodayTrend(){
 }
 
 
-function getAllData(filter,page,pageLimit){
+function getAllData(period,filter,page,pageLimit){
     var defer = q.defer();
 
     page = parseInt(page);
     pageLimit = parseInt(pageLimit);
 
-    if(filter === 'empty'|| filter === '')
-    {
+    var today=new Date();
+    var todayStart=new Date();
 
-        trendAnalysisModel.invoiceModel.findAndCountAll(
+    todayStart.setHours(0,0,0,0);
+    
+    if( filter === 'empty'|| filter === '')
+    {
+        if(period === 'All')
+        {
+              trendAnalysisModel.invoiceModel.findAndCountAll(
             {
                 offset: page,
                 limit: pageLimit,
                 order: [
                     ['IssueDate', 'ASC'],
                 ]
-            }
-
-        )
+            })
             .then(function(records) {
-
-
-                defer.resolve({'count':records.count,'rows':records.rows}) ;
+                defer.resolve(records) ;
             })
             .catch(function (err) {
                 defer.reject(err);
             })
+        }
+        else 
+        {
+           
+              trendAnalysisModel.invoiceModel.findAndCountAll(
+            {
+                where: {
+                IssueDate: {
+                        $gte: todayStart,
+                        $lte:today
+                    }
+                }
+                ,
+                offset: page,
+                limit: pageLimit,
+                order: [
+                    ['IssueDate', 'ASC'],
+                ]
+            })
+            .then(function(records) {
+                defer.resolve(records) ;
+            })
+            .catch(function (err) {
+                defer.reject(err);
+            })
+        
+        }
+
+      
 
     }
     else
     {
         // handle datetime LIKE in mysql
-        sequelize.query('SELECT * ,(select count(a.id) from Invoice a  '
+       var querystring='';
+      
+       if(period === 'All')
+       {
+           querystring = 'SELECT * ,(select count(a.id) from Invoice a  '
             +'WHERE a.Customer LIKE :search_name or a.IssueDate like :search_day or a.IssueDate like :search_date ) as countnum  '
             +'FROM Invoice WHERE Customer LIKE :search_name or IssueDate like :search_day or IssueDate like :search_date '
-            +'  ORDER BY `Invoice`.`IssueDate` ASC   LIMIT :pageno,:pagelimitno',
+            +'  ORDER BY `Invoice`.`IssueDate` ASC   LIMIT :pageno,:pagelimitno'
+       }
+       else
+       {
+            querystring = 'SELECT * ,(select count(a.id) from Invoice a  '
+            +' WHERE ( a.Customer LIKE :search_name or a.IssueDate like :search_day or a.IssueDate like :search_date ) '
+            + " and (a.IssueDate >=  '" +todayStart.toISOString() + " ' and a.IssueDate <=  '" + today.toISOString() +"') "           
+            +") as countnum  "         
+            +' FROM Invoice WHERE (Customer LIKE :search_name or IssueDate like :search_day or IssueDate like :search_date) '
+            + " and  (IssueDate >=  '" +todayStart.toISOString() + " ' and  IssueDate <=  '" + today.toISOString() +"') "
+            +'  ORDER BY `Invoice`.`IssueDate` ASC   LIMIT :pageno,:pagelimitno'
+       }
+
+        sequelize.query(querystring,
             { replacements: {
                 search_name: '%'+filter+'%' ,
                 search_date:'%'+filter+'%',
