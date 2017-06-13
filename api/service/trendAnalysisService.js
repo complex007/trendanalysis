@@ -74,7 +74,7 @@ function getAllData(period,filter,page,pageLimit){
 
     var today=new Date();
     var todayStart=new Date();
-
+    var timezone=today.getTimezoneOffset()/60;
     todayStart.setHours(0,0,0,0);
     
     if( filter === 'empty'|| filter === '')
@@ -128,32 +128,57 @@ function getAllData(period,filter,page,pageLimit){
     }
     else
     {
-        // handle datetime LIKE in mysql
-       var querystring='';
-      
-       if(period === 'All')
-       {
-           querystring = 'SELECT * ,(select count(a.id) from Invoice a  '
-            +'WHERE a.Customer LIKE :search_name or a.IssueDate like :search_day or a.IssueDate like :search_date ) as countnum  '
-            +'FROM Invoice WHERE Customer LIKE :search_name or IssueDate like :search_day or IssueDate like :search_date '
-            +'  ORDER BY `Invoice`.`IssueDate` ASC   LIMIT :pageno,:pagelimitno'
-       }
-       else
-       {
-            querystring = 'SELECT * ,(select count(a.id) from Invoice a  '
-            +' WHERE ( a.Customer LIKE :search_name or a.IssueDate like :search_day or a.IssueDate like :search_date ) '
-            + " and (a.IssueDate >=  '" +todayStart.toISOString() + " ' and a.IssueDate <=  '" + today.toISOString() +"') "           
-            +") as countnum  "         
-            +' FROM Invoice WHERE (Customer LIKE :search_name or IssueDate like :search_day or IssueDate like :search_date) '
-            + " and  (IssueDate >=  '" +todayStart.toISOString() + " ' and  IssueDate <=  '" + today.toISOString() +"') "
-            +'  ORDER BY `Invoice`.`IssueDate` ASC   LIMIT :pageno,:pagelimitno'
-       }
+        // handle datetime and customer LIKE in mysql
+        var querystring='';
+        var localTimeFilter = null;
+        // the hour of the datetime need to be adjusted to UTCtime
+        if(parseInt(filter))
+        {
+            var result = parseInt(filter) + timezone;
+            if (result > 0)
+            {
+                localTimeFilter = result;
+            }
+            else
+            {
+                localTimeFilter =24 + result;
+            }
 
+        }
+        else
+        {
+            localTimeFilter = filter;
+
+        }
+        if(period === 'All')
+        {
+            querystring = 'SELECT * ,(select count(a.id) from Invoice a  '
+                +'WHERE a.Customer LIKE :search_name or a.IssueDate like :search_date  '
+                +' or a.IssueDate like :search_localtime '
+                +' ) as countnum  '
+                +'FROM Invoice WHERE Customer LIKE :search_name or IssueDate like :search_date '
+                +' or IssueDate like :search_localtime '
+                +'  ORDER BY `Invoice`.`IssueDate` ASC   LIMIT :pageno,:pagelimitno'
+        }
+        else
+        {
+                querystring = 'SELECT * ,(select count(a.id) from Invoice a  '
+                +' WHERE ( a.Customer LIKE :search_name or  a.IssueDate like :search_date '
+                +' or a.IssueDate like :search_localtime) '
+                + " and (a.IssueDate >=  '" +todayStart.toISOString() 
+                + " ' and a.IssueDate <=  '"  + today.toISOString() +"') "           
+                +") as countnum  "         
+                +' FROM Invoice WHERE (Customer LIKE :search_name or  IssueDate like :search_date'
+                +' or IssueDate like :search_localtime) '
+                + " and  (IssueDate >=  '" +todayStart.toISOString()
+                + " ' and  IssueDate <=  '"  + today.toISOString() +"') "
+                +'  ORDER BY `Invoice`.`IssueDate` ASC   LIMIT :pageno,:pagelimitno'
+        }
         sequelize.query(querystring,
             { replacements: {
                 search_name: '%'+filter+'%' ,
                 search_date:'%'+filter+'%',
-                search_day:filter+'%',
+                search_localtime: '%'+localTimeFilter+':%',
                 pageno:page,
                 pagelimitno:pageLimit
 
