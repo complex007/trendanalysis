@@ -211,16 +211,9 @@ function serverLocalTime(records,type){
             var timezone=today.getTimezoneOffset()/60;
             for(var i = 0; i < records.length; i++)
             {
-                var issuetime = new Date(records[i].IssueDate);
-
-                //UTCtime change to server local time
-                issuetime.setHours(
-                    issuetime.getHours()+timezone,
-                    issuetime.getMinutes(),
-                    issuetime.getSeconds(),
-                    issuetime.getMilliseconds()
-                );
-
+               //UTCtime stored in db is changed to server local GMT time 
+                var issuetime = records[i].IssueDate;
+              
                 if(i === 0)
                 {
                     values.push([issuetime,records[i].Amount]);
