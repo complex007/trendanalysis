@@ -135,9 +135,13 @@ function getAllData(period,filter,page,pageLimit){
         if(parseInt(filter))
         {
             var result = parseInt(filter) + timezone;
-            if (result > 0)
+            if (result >= 10)
             {
                 localTimeFilter = result;
+            }
+            else if(result >= 0)
+            {
+                localTimeFilter = '0' + result;
             }
             else
             {
