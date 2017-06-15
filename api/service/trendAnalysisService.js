@@ -75,7 +75,7 @@ function getAllData(period,filter,page,pageLimit){
     var today=new Date();
     var todayStart=new Date();
     var timezone=today.getTimezoneOffset()/60;
-    todayStart.setHours(0,0,0,0);
+    todayStart.setHours(0+timezone,0,0,0);
     
     if( filter === 'empty'|| filter === '')
     {

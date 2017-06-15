@@ -24,6 +24,7 @@
     "nodemon": "^1.11.0"
   },
   "dependencies": {
+    "pg": "6.x",
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
     "express-myconnection": "^1.0.4",
