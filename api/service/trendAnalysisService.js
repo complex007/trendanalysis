@@ -38,7 +38,9 @@ function getNvd3TodayTrend(){
     var today=new Date();
     var todayStart=new Date();
 
-    todayStart.setHours(0,0,0,0);
+   var timezone=today.getTimezoneOffset()/60;
+    
+     todayStart.setHours(0+timezone,0,0,0);
     trendAnalysisModel.invoiceModel.findAll(
         { 
             where: {
